@@ -1,4 +1,5 @@
 import type { Recipe } from "../types/recipe";
+import { storageService } from "../services/storageService";
 
 type RecipeCardProps = {
   recipe: Recipe;
@@ -21,8 +22,21 @@ export default function RecipeCard({
   onDelete,
   onToggleFavorite
 }: RecipeCardProps) {
+  
+  const imageUrl = recipe.image_path 
+    ? storageService.getPublicUrl(recipe.image_path) 
+    : "https://via.placeholder.com/300x200?text=No+Image";
+
   return (
     <div className="recipe-card">
+      <div className="recipe-card-image" style={{ width: '100%', height: '180px', overflow: 'hidden', borderRadius: '8px 8px 0 0' }}>
+        <img 
+          src={imageUrl} 
+          alt={recipe.title} 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
+      </div>
+
       <div className="recipe-card-badge">{categoryName}</div>
       <h3 className="recipe-card-title">{recipe.title}</h3>
       <div className="recipe-card-meta">

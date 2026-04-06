@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { NewRecipe, Recipe } from "../types/recipe";
 import { createRecipe, getAllRecipes, updateRecipe, deleteRecipe } from "../services/recipeService";
+import { storageService } from "../services/storageService";
 
 // Custom hook for loading and managing all recipes
 export function useRecipes() {
@@ -65,14 +66,22 @@ export function useRecipes() {
   // Deletes a recipe
   async function removeRecipe(recipeId: number) {
     clearMessages();
-    const { error } = await deleteRecipe(recipeId);
+    const recipeToDelete = recipes.find(r => r.id === recipeId);
 
+    if (recipeToDelete?.image_path) {
+      const { error: storageError } = await storageService.deleteImage(recipeToDelete.image_path);
+      if (storageError) {
+        console.error("Failed to delete image from storage:", storageError.message);
+      }
+    }
+
+    const { error } = await deleteRecipe(recipeId);
     if (error) {
       setError(error.message);
       return false;
     }
 
-    setSuccessMessage("Recipe deleted successfully.");
+    setSuccessMessage("Recipe and associated image deleted successfully.");
     await loadRecipes();
     return true;
   }
